@@ -326,7 +326,7 @@ This project uses ES Modules.
 
 1.  Clone the repository:
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/tamler/wyreup-mcp
     cd wyreup-mcp
     ```
 2.  Install dependencies:

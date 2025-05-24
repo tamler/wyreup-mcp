@@ -2,7 +2,7 @@ Project Brief: WyreUP MCP Adapter
 
 Document Version: 0.1.3
 Date: 2025-05-23
-Project Lead/Contact: Jacob Carter
+Project Lead/Contact: Project Lead
 
 ⸻
 
