@@ -1,6 +1,6 @@
-# WyreUP MCP Adapter
-
-WyreUP MCP Adapter enables anyone to expose and control their automation workflows (e.g., n8n, Make.com, FlowiseAI) as agent-callable tools using the Model Context Protocol (MCP). This allows you to connect your existing automations to LLM agents.
+# [WyreUP MCP Adapter](https://wyreup.com)
+  
+WyreUP MCP Adapter enables anyone to expose and control their automation workflows (e.g., n8n, Make.com, FlowiseAI) as agent-callable tools using the Model Context Protocol (MCP). This allows you to connect your existing automations to LLM agents. Learn more about WyreUP at [wyreup.com](https://wyreup.com).
 
 This project provides a local MCP server that reads a `wyreup.json` manifest file to define and expose your automation tools.
 
