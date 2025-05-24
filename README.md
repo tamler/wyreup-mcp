@@ -27,7 +27,7 @@ This project provides a local MCP server that reads a `wyreup.json` manifest fil
   ```json
   {
     "binary": true,
-    "contentType": "image/png", // Or any other appropriate MIME type
+    "contentType": "image/png",
     "data": "base64-encoded-string-of-the-file-content"
   }
   ```
