@@ -1,5 +1,4 @@
 {
-  "username": "demo-user",
   "tools": [
     {
       "name": "random_quote",
@@ -14,19 +13,33 @@
       "name": "current_time_utc",
       "description": "Returns the current server time in ISO 8601 UTC format.",
       "url": "https://wyreup.com/tools-mock/current-time",
-      "public": true,
+      "public": false,
       "input": {},
       "output": { "currentTimeISO": "string" },
-      "method": "GET"
+      "method": "GET",
+      "auth": {
+        "type": "header",
+        "name": "X-API-Key",
+        "value": "mock-secret-key"
+      }
     },
     {
       "name": "echo_message",
       "description": "Echoes back the JSON body. Expects 'message' and 'detail'.",
       "url": "https://wyreup.com/tools-mock/echo",
-      "public": true,
+      "public": false,
       "input": { "message": "string", "detail": "string" },
-      "output": { "received_message": "string", "received_detail": "string", "timestamp": "string" },
-      "method": "POST"
+      "output": {
+        "received_message": "string",
+        "received_detail": "string",
+        "timestamp": "string"
+      },
+      "method": "POST",
+      "auth": {
+        "type": "basic",
+        "username": "testuser",
+        "password": "testpassword"
+      }
     }
   ]
 }
