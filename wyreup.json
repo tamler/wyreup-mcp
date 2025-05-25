@@ -36,9 +36,9 @@
       },
       "method": "POST",
       "auth": {
-        "type": "basic",
-        "username": "testuser",
-        "password": "testpassword"
+        "type": "header",
+        "name": "X-API-Key",
+        "value": "test-api-key-12345"
       }
     }
   ]
