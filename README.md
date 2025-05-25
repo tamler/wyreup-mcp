@@ -12,7 +12,7 @@ This project provides a local MCP server that reads a `wyreup.json` manifest fil
 - **Tool Execution Proxy**: Forwards tool execution requests to their configured direct URLs, handling specified authentication.
 - **Header Whitelisting**: Control which additional headers (beyond auth) are forwarded to your tools using `tool.headers_whitelist`. Defaults to `Authorization` and `X-Agent-ID` if no specific auth is defined for the tool.
 - **Tool-Specific Authentication (v0.3.0)**:
-  - Each tool can define an `auth` object specifying authentication type (`header`, `jwt`) and necessary credentials.
+  - Each tool can define an `auth` object specifying authentication type (`header`, `jwt`) and necessary credentials, or specify `authFrom` to securely load credentials from `~/.wyreup-secrets/<user>.json`.
   - The server automatically applies these authentication details when calling the tool's URL.
 - **Async Tool Support (v0.2.0)**:
 - Tools can be marked as `async: true`.
@@ -141,7 +141,7 @@ This `auth.value` will be resolved to: `yourSecretKey`.
 
 **Example `wyreup.json` (Schema v0.3):**
 
-All tools must now define a fully-qualified `url`. There is no longer a global `base_url`.
+All tools must define a fully-qualified `url` field. This design allows each tool to point to different external endpoints, supporting multiple automation platforms and services.
 
 ```json
 {
@@ -194,6 +194,16 @@ All tools must now define a fully-qualified `url`. There is no longer a global `
         "properties": { "data": { "type": "string" } }
       },
       "public": false
+    },
+    {
+      "name": "secure-tool-external",
+      "description": "Tool using external secrets.",
+      "url": "https://api.example.com/secure",
+      "authFrom": {
+        "user": "acme-user"
+      },
+      "input": {},
+      "output": {}
     }
   ]
 }
@@ -205,8 +215,11 @@ All tools must now define a fully-qualified `url`. There is no longer a global `
   - `name`: Unique name for the tool (used in the URL). **Must be unique across all tools in the manifest.**
   - `description`: A human-readable description.
   - `url` (string, **required**): The full direct URL endpoint for this tool. Must be a fully-qualified URL. Environment variable interpolation is supported.
+  - `method` (string, optional, default: `POST`): HTTP method for the tool. Must be one of: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`.
   - `auth` (object, optional): Defines the authentication method for the tool. Now supports structured types (see table below for supported types).
     - Values within the `auth` object (like `value`, `username`, `password`, `token`) also support environment variable interpolation.
+  - `authFrom` (object, optional): Alternative to `auth` for loading credentials from external files. Mutually exclusive with `auth`.
+    - `user` (string, required): Username for loading secrets from `~/.wyreup-secrets/<user>.json` using the tool name as the key.
   - `input`: JSON schema describing the expected input for the tool.
   - `output`: JSON schema describing the output of the tool.
   - `public` (boolean, optional, default: `false`): Flags for future use with a hosted registry.
@@ -221,6 +234,23 @@ All tools must now define a fully-qualified `url`. There is no longer a global `
 | --------- | --------------- | ----------------------------------- |
 | header    | name, value     | Adds a custom HTTP header           |
 | jwt       | token           | Sends Authorization: Bearer <token> |
+
+🔐 **External Secrets Support**: Alternatively, you may define an `authFrom` object with a `user` field. This will load credentials from a file at `~/.wyreup-secrets/<user>.json` using the tool's name as the lookup key. This provides secure credential management by keeping sensitive data outside the manifest file.
+
+**Example external secrets file** (`~/.wyreup-secrets/demo-user.json`):
+```json
+{
+  "my-secure-tool": {
+    "type": "header",
+    "name": "X-API-Key",
+    "value": "secret-api-key-from-external-file"
+  },
+  "another-tool": {
+    "type": "jwt",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+```
 
 ## Usage
 

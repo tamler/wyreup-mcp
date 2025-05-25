@@ -40,6 +40,18 @@
         "name": "X-API-Key",
         "value": "test-api-key-12345"
       }
+    },
+    {
+      "name": "secure_external_tool",
+      "description": "Example tool using external secrets from ~/.wyreup-secrets.",
+      "url": "https://wyreup.com/tools-mock/secure-external",
+      "public": false,
+      "input": { "query": "string" },
+      "output": { "result": "string" },
+      "method": "POST",
+      "authFrom": {
+        "user": "demo-user"
+      }
     }
   ]
 }
