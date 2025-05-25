@@ -92,6 +92,8 @@ Usage: wyreup-mcp [options]
 Options:
   --config [file]     Path to a wyreup.json manifest (default: ./${CONFIG_PATH})
   --transport [type]  Communication transport: stdio or sse (default: stdio)
+  --port [number]     Port for SSE transport (default: 3333)
+  --host [host]       Host for SSE transport (default: localhost)
   --init              Create a starter wyreup.json in the current folder
   --validate          Check wyreup.json for structural issues
   --debug             Enable detailed logging for tool execution
@@ -99,7 +101,7 @@ Options:
 
 Transport modes:
   stdio               Standard input/output (for Claude Desktop and other MCP clients) [default]
-  sse                 Server-Sent Events (for remote MCP clients) [coming soon]
+  sse                 Server-Sent Events (for remote MCP clients via HTTP)
 
 Note: Server starts automatically unless --init, --validate, or --help is specified.
 `);
