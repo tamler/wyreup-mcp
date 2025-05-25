@@ -5,9 +5,9 @@ import { fileURLToPath } from 'url';
 import chalk from 'chalk';
 
 // Import from new lib modules
-import { CONFIG_PATH, DEBUG, TRANSPORT, argv } from './lib/config.js';
+import { CONFIG_PATH, DEBUG, TRANSPORT, PORT, HOST, argv } from './lib/config.js';
 import { loadManifest, validateManifest } from './lib/manifest.js';
-import { WyreupMcpServer } from './lib/mcp-server.js';
+import { createMcpServer } from './lib/mcp-server.js';
 
 // Replicate __dirname for ES Modules
 const __filename = fileURLToPath(import.meta.url);
@@ -16,7 +16,6 @@ const __dirname = path.dirname(__filename);
 const INIT_FLAG = argv.init;
 const VALIDATE_FLAG = argv.validate;
 const HELP_FLAG = argv.help || argv.h;
-const SERVE_FLAG = argv.serve; // True if --serve is present, undefined otherwise
 
 let toolsConfig = {};
 
@@ -91,7 +90,6 @@ function displayHelp() {
 Usage: wyreup-mcp [options]
 
 Options:
-  --serve             Start the local MCP server (default action if no other primary flag is given)
   --config [file]     Path to a wyreup.json manifest (default: ./${CONFIG_PATH})
   --transport [type]  Communication transport: stdio or sse (default: stdio)
   --init              Create a starter wyreup.json in the current folder
@@ -103,8 +101,7 @@ Transport modes:
   stdio               Standard input/output (for Claude Desktop and other MCP clients) [default]
   sse                 Server-Sent Events (for remote MCP clients) [coming soon]
 
-  --publish           Upload tools to the WyreUP registry (coming soon)
-  --proxy-mode        Enable secure proxy routing and secret injection (coming soon)
+Note: Server starts automatically unless --init, --validate, or --help is specified.
 `);
   process.exit(0);
 }
@@ -112,13 +109,6 @@ Transport modes:
 if (HELP_FLAG) {
   displayHelp();
 }
-
-// Determine if the server should start
-// Server starts if:
-// 1. SERVE_FLAG is explicitly true (argv.serve is true)
-// 2. No other primary action flags (INIT_FLAG, VALIDATE_FLAG, HELP_FLAG) are true, and SERVE_FLAG is undefined (meaning no --serve but also no other action)
-const shouldStartServer = SERVE_FLAG === true || (SERVE_FLAG === undefined && !INIT_FLAG && !VALIDATE_FLAG && !HELP_FLAG);
-
 
 if (VALIDATE_FLAG) {
   console.log(chalk.blue(`Validating manifest: ${path.resolve(process.cwd(), CONFIG_PATH)}`));
@@ -145,8 +135,10 @@ if (VALIDATE_FLAG) {
   process.exit(0); // Exit after validation
 }
 
+// Server starts by default unless a specific action flag is provided
+const shouldStartServer = !INIT_FLAG && !VALIDATE_FLAG && !HELP_FLAG;
 
-if (shouldStartServer) {
+async function startServer() {
   console.log(chalk.blue(`Attempting to start MCP server with manifest: ${CONFIG_PATH}`));
   console.log(chalk.blue(`Transport mode: ${TRANSPORT}`));
   
@@ -166,7 +158,7 @@ if (shouldStartServer) {
   // Handle different transport modes
   if (TRANSPORT === 'stdio') {
     // Run MCP server over stdio
-    const mcpServer = new WyreupMcpServer(toolsConfig, { DEBUG });
+    const mcpServer = createMcpServer(toolsConfig, { DEBUG });
     try {
       await mcpServer.runStdio();
       // Server will run indefinitely in stdio mode
@@ -175,23 +167,24 @@ if (shouldStartServer) {
       process.exit(1);
     }
   } else if (TRANSPORT === 'sse') {
-    // Run MCP server over SSE (not yet implemented)
-    console.error(chalk.red('SSE transport is not yet implemented. Use --transport stdio'));
-    process.exit(1);
+    // Run MCP server over SSE
+    const mcpServer = createMcpServer(toolsConfig, { DEBUG });
+    try {
+      await mcpServer.runSse(PORT, HOST);
+      // Server will run indefinitely in SSE mode
+    } catch (error) {
+      console.error(chalk.red(`Failed to start MCP server in SSE mode: ${error.message}`));
+      process.exit(1);
+    }
   } else {
     console.error(chalk.red(`Unknown transport mode: ${TRANSPORT}`));
     process.exit(1);
   }
-} else if (!INIT_FLAG && !HELP_FLAG && !VALIDATE_FLAG && SERVE_FLAG === false) {
-    // This case handles when --no-serve is explicitly passed and no other action flag.
-    console.log(chalk.yellow("Server not started due to --no-serve or other explicit action not taken."));
-    console.log(chalk.cyan("Use 'wyreup-mcp --help' for command options."));
-} else if (!INIT_FLAG && !HELP_FLAG && !VALIDATE_FLAG && SERVE_FLAG === undefined && process.argv.length === 2) {
-    // No flags provided at all, default to starting the server was handled by shouldStartServer.
-    // This block is more of a fallback or for clarity if shouldStartServer logic changes.
-    // If shouldStartServer is false here, it means some condition wasn't met.
-    // However, current shouldStartServer logic should make it true if no flags.
-    // This specific condition might be redundant if shouldStartServer is robust.
-    console.log(chalk.yellow("No specific action requested. Defaulting to server start (if not already handled)."));
-    console.log(chalk.cyan("If server doesn't start, use 'wyreup-mcp --serve' or 'wyreup-mcp --help'."));
+}
+
+if (shouldStartServer) {
+  startServer().catch(error => {
+    console.error(chalk.red(`Server startup failed: ${error.message}`));
+    process.exit(1);
+  });
 }
