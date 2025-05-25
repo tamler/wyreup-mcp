@@ -1,40 +1,22 @@
 # [WyreUP MCP Adapter](https://wyreup.com)
 
-WyreUP MCP Adapter enables anyone to expose and control their automation workflows (e.g., n8n, Make.com, FlowiseAI) as agent-callable tools using the Model Context Protocol (MCP). This allows you to connect your existing automations to LLM agents. Learn more about WyreUP at [wyreup.com](https://wyreup.com).
+WyreUP MCP Adapter enables anyone to expose and control their automation workflows (e.g., n8n, Make.com, FlowiseAI) as agent-callable tools using the Model Context Protocol (MCP). This allows you to connect your existing automations to LLM agents like Claude Desktop. Learn more about WyreUP at [wyreup.com](https://wyreup.com).
 
-This project provides a local MCP server that reads a `wyreup.json` manifest file to define and expose your automation tools.
+This project provides a standards-compliant MCP server that reads a `wyreup.json` manifest file to define and expose your automation tools.
 
 ## Features
 
-- **Local MCP Server**: Runs on your machine over HTTP. Designed to be exposed securely via HTTPS using a reverse proxy (like Caddy or NGINX).
+- **MCP Standards Compliant**: Full compatibility with MCP protocol specification
+- **Multiple Transport Modes**:
+  - **Stdio**: Standard input/output (default) - for Claude Desktop and other MCP clients
+  - **SSE**: Server-Sent Events (coming soon) - for remote MCP clients
 - **`wyreup.json` Manifest**: A simple JSON file to declare your automation tools, their inputs, outputs, direct URLs, authentication methods, and async behavior.
-- **MCP Compliant**: Implements standard MCP discovery endpoints (`/mcp/capabilities`, `/mcp/tools`).
 - **Tool Execution Proxy**: Forwards tool execution requests to their configured direct URLs, handling specified authentication.
-- **Header Whitelisting**: Control which additional headers (beyond auth) are forwarded to your tools using `tool.headers_whitelist`. Defaults to `Authorization` and `X-Agent-ID` if no specific auth is defined for the tool.
-- **Tool-Specific Authentication (v0.3.0)**:
+- **Tool-Specific Authentication**:
   - Each tool can define an `auth` object specifying authentication type (`header`, `jwt`) and necessary credentials, or specify `authFrom` to securely load credentials from `~/.wyreup-secrets/<user>.json`.
   - The server automatically applies these authentication details when calling the tool's URL.
-- **Async Tool Support (v0.2.0)**:
-- Tools can be marked as `async: true`.
-- Returns a `job_id` and `poll_url` for async tools.
-- `GET /status/{job_id}` endpoint to check job status.
-- Supports `callback_url` in the tool request payload for asynchronous result delivery.
-
-- **GET Tool Execution (v0.2.0)**:
-- Allows `GET /tools/{toolName}` to trigger tool execution if:
-  - The tool's input schema is empty.
-  - Or, query parameters are used to match tool input keys (e.g., `/tools/slugify?text=hello`).
-- If a tool requires fields not found in query params, a `400` error is returned.
-- **Binary/File Responses (v0.2.0)**:
-- Tools can return binary data (e.g., images) by responding with a specific JSON structure:
-  ```json
-  {
-    "binary": true,
-    "contentType": "image/png",
-    "data": "base64-encoded-string-of-the-file-content"
-  }
-  ```
-- The MCP server will decode the base64 `data` and return a binary HTTP response with the specified `Content-Type`.
+- **Binary/File Responses**: Tools can return binary data (e.g., images) by responding with a specific JSON structure
+- **Environment Variable Interpolation**: Support for `$VAR_NAME` or `${VAR_NAME}` syntax in manifest files
 
 ## Prerequisites
 
@@ -293,119 +275,83 @@ This will output whether the manifest is valid or list any errors found, with en
     npm start
     ```
 
-This will start the MCP server, typically on `http://localhost:3333`.
+This will start the MCP server in stdio mode (default).
 
 **Running the server (after global install or via npx):**
 
 Navigate to your project directory and run:
 
 ```bash
-# Start the server (default action if wyreup.json exists and is valid)
-# Looks for wyreup.json in current directory, runs on port 3333
+# Start the MCP server in stdio mode (default)
+# Looks for wyreup.json in current directory
 wyreup-mcp
 # or explicitly:
-wyreup-mcp --serve
+wyreup-mcp --serve --transport stdio
 
 # Using npx:
 npx wyreup-mcp
 # or explicitly:
-npx wyreup-mcp --serve
+npx wyreup-mcp --serve --transport stdio
 
-
-# Custom config file and port
-wyreup-mcp --serve --config ./path/to/your/wyreup.json --port 3000
+# Custom config file
+wyreup-mcp --config ./path/to/your/wyreup.json
 # or
-npx wyreup-mcp --serve --config ./path/to/your/wyreup.json --port 3000
+npx wyreup-mcp --config ./path/to/your/wyreup.json
+
+# Enable debug logging
+wyreup-mcp --debug
 ```
 
-If you run `wyreup-mcp` or `npx wyreup-mcp` without any flags, it will attempt to start the server. If you want to see all options, use `wyreup-mcp --help`.
+If you run `wyreup-mcp` or `npx wyreup-mcp` without any flags, it will attempt to start the server in stdio mode. If you want to see all options, use `wyreup-mcp --help`.
 
-The server will output the address it's running on, the manifest file being used, and the available tool endpoints.
+The server will output the transport mode being used, the manifest file being loaded, and the available tools.
 
-## API Endpoints
+## MCP Protocol
 
-Once the server is running (e.g., on `http://localhost:3333`):
+The server implements the standard Model Context Protocol (MCP) specification:
 
-- **MCP Capabilities**: `GET /mcp/capabilities`
-  - Returns information about the server and its capabilities.
-- **MCP Tools List**: `GET /mcp/tools`
-  - Lists all tools defined in `wyreup.json` with their MCP-compliant schemas.
-- **Individual Tool Definition**: `GET /tools/{toolName}`
-  - Example: `GET http://localhost:3333/tools/random_quote`
-  - Returns the detailed definition of a specific tool as found in `wyreup.json`.
-  - **Can also execute the tool via GET** if the tool's input schema is empty, or if all required inputs are provided as query parameters (e.g., `GET http://localhost:3333/tools/random_quote`). If inputs are required but not fully provided in the query, a `400` error is returned.
-- **Tool Execution (POST)**: `POST /tools/{toolName}`
-  - Example: `POST http://localhost:3333/tools/echo_message`
-  - Executes the tool by sending the request (with JSON body) to the configured `tool.url`.
-  - **Authentication**: If `tool.auth` is defined, the server automatically adds the necessary authentication (e.g., Authorization header for JWT, custom header for 'header' type) before sending the request.
-  - **Header Forwarding**: In addition to auth headers, `Authorization` and `X-Agent-ID` from the original request are forwarded by default if no `tool.auth` is specified. This can be further customized per tool using the `headers_whitelist` property in `wyreup.json`.
-  - **Synchronous Execution**: If the tool is not marked `async` and no `callback_url` is provided (for POST), or for GET executions, the server waits for the tool's URL to respond and returns the result directly.
-    - **Binary Responses**: If the tool's endpoint responds with the special binary structure (see "Binary/File Responses" under Features), the server will return the decoded binary data with the correct `Content-Type`. Otherwise, a JSON response is returned.
-  - **Asynchronous Execution (POST only)**: - If `tool.async` is `true` in `wyreup.json`, or if a `callback_url` is provided in the POST request body (e.g., `{"url": "...", "callback_url": "http://my-service/results"}`), the server will: - Immediately respond with `202 Accepted` and a JSON body like:
-    `json
-        {
-          "status": "pending",
-          "job_id": "job_123",
-          "poll_url": "http://localhost:3333/status/job_123"
-        }
-        ` - The actual tool execution happens in the background. - If a `callback_url` was provided, the server will POST the final result (or error) to that URL once the tool execution is complete. The payload to the callback URL will be:
-    `json
-        // On success
-        {
-          "job_id": "job_123",
-          "status": "completed",
-          "tool_name": "echo_message",
-          "result": { /* ... tool's output ... */ }
-        }
-        // On failure
-        {
-          "job_id": "job_123",
-          "status": "failed",
-          "tool_name": "echo_message",
-          "error": { "message": "...", "details": "..." }
-        }
-        `
-  - Failed synchronous tool executions return a normalized JSON error: `{ "error": "Human-readable message", "code": HTTP_STATUS_CODE }`.
-- **Job Status**: `GET /status/{job_id}`
-  - Example: `GET http://localhost:3333/status/job_123`
-  - Returns the status of an asynchronously executed job.
-  - Response structure:
-    ```json
-    // Pending
-    {
-      "job_id": "job_123",
-      "status": "pending",
-      "timestamp": "2023-10-27T10:30:00.000Z",
-      "tool_name": "echo_message"
-    }
-    // Completed
-    {
-      "job_id": "job_123",
-      "status": "completed",
-      "timestamp": "2023-10-27T10:30:00.000Z",
-      "tool_name": "echo_message",
-      "result": { /* ... tool's output ... */ }
-    }
-    // Failed
-    {
-      "job_id": "job_123",
-      "status": "failed",
-      "timestamp": "2023-10-27T10:30:00.000Z",
-      "tool_name": "echo_message",
-      "error": { "message": "...", "details": "..." }
-    }
-    ```
+- **Transport**: Communicates via stdio (standard input/output) by default
+- **Tool Discovery**: Implements `tools/list` to enumerate available tools
+- **Tool Execution**: Implements `tools/call` to execute tools with parameters
+- **Error Handling**: Returns standard MCP error responses for invalid requests
 
-**Quick start: Test your tools with curl**
+### Tool Execution Flow
 
-```bash
-curl http://localhost:3333/mcp/tools
-curl -X POST http://localhost:3333/tools/echo_message \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Hello", "detail": "Test message"}'
+1. **Tool Discovery**: MCP clients call `tools/list` to get available tools
+2. **Tool Execution**: MCP clients call `tools/call` with tool name and arguments
+3. **Authentication**: Server automatically handles authentication per tool configuration
+4. **Response**: Server forwards the tool's response back to the MCP client
+
+### Binary Data Handling
+
+Tools can return binary data (e.g., images) by responding with:
+```json
+{
+  "binary": true,
+  "contentType": "image/png",
+  "data": "base64-encoded-string-of-the-file-content"
+}
 ```
 
-- If the job is not found, returns a `404` error.
+For MCP clients, binary responses are indicated in the tool response with metadata about the binary content.
+
+### Claude Desktop Integration
+
+To use with Claude Desktop, add to your MCP settings (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+
+```json
+{
+  "mcpServers": {
+    "wyreup": {
+      "command": "node",
+      "args": ["/path/to/wyreup-mcp/index.js"],
+      "env": {
+        "DEBUG": "false"
+      }
+    }
+  }
+}
+```
 
 ## Development
 
@@ -432,14 +378,17 @@ This project uses ES Modules.
 
 ## Production Deployment
 
-**⚠️ Security Notice**: The MCP server runs over HTTP on localhost by default and is designed for local development. For production deployments, you should **never expose the MCP server directly** without TLS encryption. Instead, use a reverse proxy (like Caddy, NGINX, or Traefik) to:
+## Production Deployment
 
-- Terminate TLS/SSL encryption
-- Provide secure HTTPS access
-- Handle authentication and rate limiting
-- Implement proper security headers
+**MCP Server Deployment**: This MCP server is designed primarily for local use with MCP clients like Claude Desktop. The stdio transport is inherently secure as it runs locally without network exposure.
 
-Example reverse proxy configuration for production use is beyond the scope of this README, but ensure proper security measures are in place before exposing the server to external networks.
+For remote deployments:
+- **SSE Transport** (coming soon): Will enable secure remote access to MCP tools
+- **Authentication**: Tools can include their own authentication mechanisms via the `auth` configuration
+- **Environment Variables**: Use `.env` files or system environment variables for sensitive credentials
+- **External Secrets**: Store sensitive credentials in `~/.wyreup-secrets/<user>.json` files rather than in the manifest
+
+The current stdio implementation is suitable for production use with local MCP clients as it doesn't expose any network services.
 
 ## Future Enhancements (from Project Brief)
 
