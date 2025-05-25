@@ -1,29 +1,31 @@
 {
   "username": "demo-user",
-  "base_url": "https://wyreup.com/tools-mock/",
   "tools": [
     {
       "name": "random_quote",
       "description": "Returns a random inspirational quote.",
+      "url": "https://wyreup.com/tools-mock/random-quote",
+      "public": true,
       "input": {},
       "output": { "quote": "string", "author": "string" },
-      "url": "https://wyreup.com/tools-mock/random-quote",
       "method": "GET"
     },
     {
       "name": "current_time_utc",
       "description": "Returns the current server time in ISO 8601 UTC format.",
+      "url": "https://wyreup.com/tools-mock/current-time",
+      "public": true,
       "input": {},
       "output": { "currentTimeISO": "string" },
-      "url": "https://wyreup.com/tools-mock/current-time",
       "method": "GET"
     },
     {
       "name": "echo_message",
       "description": "Echoes back the JSON body. Expects 'message' and 'detail'.",
+      "url": "https://wyreup.com/tools-mock/echo",
+      "public": true,
       "input": { "message": "string", "detail": "string" },
       "output": { "received_message": "string", "received_detail": "string", "timestamp": "string" },
-      "url": "https://wyreup.com/tools-mock/echo",
       "method": "POST"
     }
   ]

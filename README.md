@@ -7,10 +7,13 @@ This project provides a local MCP server that reads a `wyreup.json` manifest fil
 ## Features
 
 - **Local MCP Server**: Runs on your machine, exposing tools via HTTP.
-- **`wyreup.json` Manifest**: A simple JSON file to declare your automation tools, their inputs, outputs, webhook endpoints, and async behavior.
+- **`wyreup.json` Manifest**: A simple JSON file to declare your automation tools, their inputs, outputs, direct URLs, authentication methods, and async behavior.
 - **MCP Compliant**: Implements standard MCP discovery endpoints (`/mcp/capabilities`, `/mcp/tools`).
-- **Webhook Proxy**: Forwards tool execution requests to your configured automation webhooks.
-- **Header Whitelisting**: Control which headers are forwarded to your tools using `tool.headers_whitelist`. Defaults to `Authorization` and `X-Agent-ID`.
+- **Tool Execution Proxy**: Forwards tool execution requests to their configured direct URLs, handling specified authentication.
+- **Header Whitelisting**: Control which additional headers (beyond auth) are forwarded to your tools using `tool.headers_whitelist`. Defaults to `Authorization` and `X-Agent-ID` if no specific auth is defined for the tool.
+- **Tool-Specific Authentication (v0.3.0)**:
+  - Each tool can define an `auth` object specifying authentication type (`header`, `basic`, `jwt`) and necessary credentials.
+  - The server automatically applies these authentication details when calling the tool's URL.
 - **Async Tool Support (v0.2.0)**:
 - Tools can be marked as `async: true`.
 - Returns a `job_id` and `poll_url` for async tools.
@@ -110,30 +113,43 @@ Then edit `.env` with your desired values.
 
 The server supports environment variable interpolation in string values within the `wyreup.json` manifest itself. You can use `$VAR_NAME` or `${VAR_NAME}` syntax. If an environment variable is not found, a warning will be logged, and the placeholder will be replaced with an empty string.
 
-This is particularly useful for sensitive data like API keys in `base_url` or `webhook` paths, or any other string field within the configuration. See `.env.example` for how to set these up.
+This is particularly useful for sensitive data like API keys in tool `url` fields, or within `auth` object values (e.g., `auth.value` for header auth, `auth.token` for JWT). See `.env.example` for how to set these up.
 
 Example:
-If you have an environment variable `N8N_API_KEY=yourSecretKey` (e.g., in your `.env` file), you can use it in `wyreup.json`:
+If you have an environment variable `TOOL_API_KEY=yourSecretKey` (e.g., in your `.env` file), you can use it in `wyreup.json`:
 
 ```json
 {
-  "base_url": "https://your-n8n-instance.com/webhook/$N8N_API_KEY/"
+  "tools": [
+    {
+      "name": "secure-api-tool",
+      "description": "Accesses a secure API.",
+      "url": "https://api.example.com/data?param=$SOME_OTHER_ENV_VAR",
+      "auth": {
+        "type": "header",
+        "name": "X-Api-Key",
+        "value": "$TOOL_API_KEY"
+      },
+      "input": {},
+      "output": {}
+    }
+  ]
 }
 ```
 
-This will be resolved to: `https://your-n8n-instance.com/webhook/yourSecretKey/`
+This `auth.value` will be resolved to: `yourSecretKey`.
 
-**Example `wyreup.json`:**
+**Example `wyreup.json` (Schema v0.3):**
+
+All tools must now define a fully-qualified `url`. There is no longer a global `base_url`.
 
 ```json
 {
-  "username": "your-username",
-  "base_url": "https://your-n8n-instance.com/webhook/",
   "tools": [
     {
       "name": "summarize-url",
       "description": "Summarizes any URL using an n8n automation.",
-      "webhook": "your-n8n-summarize-webhook-id",
+      "url": "https://your-n8n-instance.com/webhook/your-n8n-summarize-webhook-id",
       "input": {
         "type": "object",
         "properties": {
@@ -156,9 +172,34 @@ This will be resolved to: `https://your-n8n-instance.com/webhook/yourSecretKey/`
       },
       "public": true,
       "paid": false,
-      "headers_whitelist": ["x-custom-header", "authorization"],
+      "headers_whitelist": ["x-custom-header"],
       "async": false,
       "callback_supported": false
+    },
+    {
+      "name": "secure-tool-example",
+      "description": "An example tool requiring API key authentication.",
+      "url": "https://api.example.com/secure-endpoint",
+      "auth": {
+        "type": "header",
+        "name": "X-API-KEY",
+        "value": "your_secret_api_key_here_or_from_env"
+      },
+      "input": { "type": "object", "properties": { "query": { "type": "string" } } },
+      "output": { "type": "object", "properties": { "data": { "type": "string" } } },
+      "public": false
+    },
+    {
+      "name": "basic-auth-tool",
+      "description": "Tool with Basic authentication.",
+      "url": "https://another-api.com/basic-auth-resource",
+      "auth": {
+        "type": "basic",
+        "username": "user_from_env_or_direct",
+        "password": "$MY_TOOL_PASSWORD"
+      },
+      "input": {},
+      "output": {}
     }
   ]
 }
@@ -166,18 +207,27 @@ This will be resolved to: `https://your-n8n-instance.com/webhook/yourSecretKey/`
 
 **Key fields:**
 
-- `username`: Your identifier.
-- `base_url`: The base URL for your automation platform's webhooks (e.g., your n8n instance).
 - `tools`: An array of tool objects.
   - `name`: Unique name for the tool (used in the URL). **Must be unique across all tools in the manifest.**
   - `description`: A human-readable description.
-  - `webhook`: The specific path or ID for this tool's webhook on your automation platform (appended to `base_url`).
+  - `url` (string, **required**): The full direct URL endpoint for this tool. Must be a fully-qualified URL. Environment variable interpolation is supported.
+  - `auth` (object, optional): Defines the authentication method for the tool. Now supports structured types (see table below for supported types).
+    - Values within the `auth` object (like `value`, `username`, `password`, `token`) also support environment variable interpolation.
   - `input`: JSON schema describing the expected input for the tool.
   - `output`: JSON schema describing the output of the tool.
-  - `public`, `paid`: Flags for future use with a hosted registry.
-  - `headers_whitelist` (optional): An array of strings. If defined, only headers matching these (case-insensitive) will be forwarded from the incoming request to the tool's webhook. If not defined, defaults to forwarding `authorization` and `x-agent-id` only. `Content-Type` is always forwarded for JSON payloads.
+  - `public` (boolean, optional, default: `false`): Flags for future use with a hosted registry.
+  - `paid` (boolean, optional, default: `false`): Flags for future use with a hosted registry.
+  - `headers_whitelist` (optional): An array of strings. If defined, only headers matching these (case-insensitive) will be forwarded from the incoming request to the tool's URL, *in addition* to any headers generated by the `auth` mechanism. If not defined and no `auth` is specified, defaults to forwarding `authorization` and `x-agent-id` only. `Content-Type` is always forwarded for JSON payloads.
   - `async` (optional, boolean, default: `false`): If `true`, the tool execution will be handled asynchronously. The server will immediately return a job ID and polling URL.
   - `callback_supported` (optional, boolean, default: `false`): Indicates if the tool can utilize a `callback_url` provided in the request payload for asynchronous result delivery.
+
+**Tool `auth` object types**
+
+| auth.type | Required Fields        | Description                              |
+|-----------|------------------------|------------------------------------------|
+| header    | name, value            | Adds a custom HTTP header                |
+| basic     | username, password     | Sends Authorization: Basic ... header    |
+| jwt       | token                  | Sends Authorization: Bearer <token>      |
 
 ## Usage
 
@@ -263,38 +313,39 @@ Once the server is running (e.g., on `http://localhost:3333`):
   - **Can also execute the tool via GET** if the tool's input schema is empty, or if all required inputs are provided as query parameters (e.g., `GET http://localhost:3333/tools/mytool?param1=value1`). If inputs are required but not fully provided in the query, a `400` error is returned.
 - **Tool Execution (POST)**: `POST /tools/{toolName}`
   - Example: `POST http://localhost:3333/tools/summarize-url`
-  - Executes the tool by proxying the request (with JSON body) to the configured webhook.
-  - **Header Forwarding**: By default, `Authorization` and `X-Agent-ID` headers are forwarded. This can be customized per tool using the `headers_whitelist` property in `wyreup.json`.
-  - **Synchronous Execution**: If the tool is not marked `async` and no `callback_url` is provided (for POST), or for GET executions, the server waits for the webhook to respond and returns the result directly.
-    - **Binary Responses**: If the tool's webhook responds with the special binary structure (see "Binary/File Responses" under Features), the server will return the decoded binary data with the correct `Content-Type`. Otherwise, a JSON response is returned.
+  - Executes the tool by sending the request (with JSON body) to the configured `tool.url`.
+  - **Authentication**: If `tool.auth` is defined, the server automatically adds the necessary authentication (e.g., Authorization header for Basic/JWT, custom header for 'header' type) before sending the request.
+  - **Header Forwarding**: In addition to auth headers, `Authorization` and `X-Agent-ID` from the original request are forwarded by default if no `tool.auth` is specified. This can be further customized per tool using the `headers_whitelist` property in `wyreup.json`.
+  - **Synchronous Execution**: If the tool is not marked `async` and no `callback_url` is provided (for POST), or for GET executions, the server waits for the tool's URL to respond and returns the result directly.
+    - **Binary Responses**: If the tool's endpoint responds with the special binary structure (see "Binary/File Responses" under Features), the server will return the decoded binary data with the correct `Content-Type`. Otherwise, a JSON response is returned.
   - **Asynchronous Execution (POST only)**:
-    - If `tool.async` is `true` in `wyreup.json`, or if a `callback_url` is provided in the POST request body (e.g., `{"url": "...", "callback_url": "http://my-service/results"}`), the server will:
-      - Immediately respond with `202 Accepted` and a JSON body like:
-        ```json
-        {
-          "status": "pending",
-          "job_id": "job_123",
-          "poll_url": "http://localhost:3333/status/job_123"
-        }
-        ```
-      - The actual tool execution happens in the background.
-      - If a `callback_url` was provided, the server will POST the final result (or error) to that URL once the tool execution is complete. The payload to the callback URL will be:
-        ```json
-        // On success
-        {
-          "job_id": "job_123",
-          "status": "completed",
-          "tool_name": "summarize-url",
-          "result": { /* ... tool's output ... */ }
-        }
-        // On failure
-        {
-          "job_id": "job_123",
-          "status": "failed",
-          "tool_name": "summarize-url",
-          "error": { "message": "...", "details": "..." }
-        }
-        ```
+        - If `tool.async` is `true` in `wyreup.json`, or if a `callback_url` is provided in the POST request body (e.g., `{"url": "...", "callback_url": "http://my-service/results"}`), the server will:
+          - Immediately respond with `202 Accepted` and a JSON body like:
+            ```json
+            {
+              "status": "pending",
+              "job_id": "job_123",
+              "poll_url": "http://localhost:3333/status/job_123"
+            }
+            ```
+          - The actual tool execution happens in the background.
+          - If a `callback_url` was provided, the server will POST the final result (or error) to that URL once the tool execution is complete. The payload to the callback URL will be:
+            ```json
+            // On success
+            {
+              "job_id": "job_123",
+              "status": "completed",
+              "tool_name": "summarize-url",
+              "result": { /* ... tool's output ... */ }
+            }
+            // On failure
+            {
+              "job_id": "job_123",
+              "status": "failed",
+              "tool_name": "summarize-url",
+              "error": { "message": "...", "details": "..." }
+            }
+            ```
   - Failed synchronous tool executions return a normalized JSON error: `{ "error": "Human-readable message", "code": HTTP_STATUS_CODE }`.
 - **Job Status**: `GET /status/{job_id}`
   - Example: `GET http://localhost:3333/status/job_123`
@@ -325,6 +376,15 @@ Once the server is running (e.g., on `http://localhost:3333`):
       "error": { "message": "...", "details": "..." }
     }
     ```
+
+**Quick start: Test your tools with curl**
+
+```bash
+curl http://localhost:3333/mcp/tools
+curl -X POST http://localhost:3333/tools/example-tool \
+  -H "Content-Type: application/json" \
+  -d '{"inputField": "value"}'
+```
   - If the job is not found, returns a `404` error.
 
 ## Development
