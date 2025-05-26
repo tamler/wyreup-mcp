@@ -1,6 +1,12 @@
 # WyreUP MCP Server
 
-A production-ready Model Context Protocol (MCP) server that transforms webhook endpoints from automation platforms (n8n, Make.com, Zapier, FlowiseAI, etc.) into reliable, agent-callable tools for AI systems like Claude Desktop.
+A production-ready Model Context Protocol (MCP) server that transforms webhook endpoints from automation platforms (n8n, Make.com, Zapier, FlowiseAI, etc.) into reliable, agent-callable tools for **any MCP-compatible AI system**.
+
+**Compatible with:**
+- 🤖 **Claude Desktop** (Anthropic's official desktop app)
+- 🔧 **Any MCP Client** (VS Code extensions, custom applications, etc.)
+- 🌐 **Future MCP Services** (growing ecosystem of MCP-enabled tools)
+- 📱 **Custom Integrations** (build your own MCP client)
 
 [![npm version](https://badge.fury.io/js/wyreup-mcp.svg)](https://www.npmjs.com/package/wyreup-mcp)
 [![GitHub](https://img.shields.io/github/license/tamler/wyreup-mcp)](https://github.com/tamler/wyreup-mcp)
@@ -160,9 +166,10 @@ Create `wyreup.json`:
 }
 ```
 
-### Connect to Claude Desktop
+### Connect to MCP Clients
 
-Add to your Claude Desktop config:
+**Claude Desktop:**
+Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 
 ```json
 {
@@ -175,6 +182,13 @@ Add to your Claude Desktop config:
   }
 }
 ```
+
+**Other MCP Clients:**
+- **VS Code Extensions**: Use MCP extension settings
+- **Custom Applications**: Connect via stdio transport on any platform
+- **Server Deployments**: Use HTTP/SSE transport mode (`--transport sse --port 3333`)
+
+The server implements the standard MCP protocol, so it works with any compliant client.
 
 ## 🔧 Configuration Reference
 
