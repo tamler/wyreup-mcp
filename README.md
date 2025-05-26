@@ -11,7 +11,7 @@ A production-ready Model Context Protocol (MCP) server that transforms webhook e
 [![npm version](https://img.shields.io/npm/v/wyreup-mcp/0.2.5)](https://www.npmjs.com/package/wyreup-mcp)
 [![GitHub](https://img.shields.io/github/license/tamler/wyreup-mcp)](https://github.com/tamler/wyreup-mcp)
 
-**📦 NPM Package:** [wyreup-mcp](https://www.npmjs.com/package/wyreup-mcp) (v0.3.0)
+**📦 NPM Package:** [wyreup-mcp](https://www.npmjs.com/package/wyreup-mcp) (v0.2.5)
 **🔗 GitHub Repository:** [tamler/wyreup-mcp](https://github.com/tamler/wyreup-mcp)
 
 ## 🎯 What It Does
