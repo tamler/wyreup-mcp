@@ -4,7 +4,7 @@
   "type": "module",
   "main": "index.js",
   "bin": {
-    "wyreup-mcp": "./index.js"
+    "wyreup-mcp": "index.js"
   },
   "scripts": {
     "start": "node index.js",
@@ -30,7 +30,7 @@
   "homepage": "https://github.com/tamler/wyreup-mcp",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tamler/wyreup-mcp.git"
+    "url": "git+https://github.com/tamler/wyreup-mcp.git"
   },
   "bugs": {
     "url": "https://github.com/tamler/wyreup-mcp/issues"
