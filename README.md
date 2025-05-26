@@ -143,7 +143,47 @@ npm run test:sse-client
 - 🖼️ **Image Generation** - `GET /tools-mock/generate-image` (returns base64 PNG)
 - 🎵 **Audio Generation** - `GET /tools-mock/generate-audio` (returns base64 WAV with bytebeat music!)
 
-### Basic Tool Configuration
+### ⚡ **Ultra-Fast Setup: Simplified Format**
+
+**NEW**: Get started in under 2 minutes with the simplified webhook format! Perfect for rapid prototyping and low-code users.
+
+```json
+{
+  "tools": [
+    {
+      "name": "summary_tool",
+      "webhook": "https://auto.nowarmup.com/webhook/summary"
+    }
+  ]
+}
+```
+
+**That's it!** The system automatically infers:
+- ✅ **Description**: "Forward to summary webhook"
+- ✅ **Method**: POST (default for webhooks)
+- ✅ **Input Schema**: Empty object `{}`
+- ✅ **Output**: Assumes text response
+
+**Test immediately:**
+```bash
+echo '{ "jsonrpc": "2.0", "id": "call-1", "method": "tools/call", "params": { "name": "summary_tool", "arguments": {} } }' | npx wyreup-mcp --config wyreup.json --transport stdio --debug
+```
+
+**Supported Simplified Format:**
+```json
+{
+  "tools": [
+    {
+      "name": "your_tool_name",
+      "webhook": "https://your-webhook-url.com/endpoint"
+    }
+  ]
+}
+```
+
+**Mixed Format Support:** You can combine simplified and full format tools in the same configuration file for maximum flexibility.
+
+### Basic Tool Configuration (Full Format)
 
 Create `wyreup.json`:
 
