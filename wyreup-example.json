@@ -1,0 +1,277 @@
+{
+  "tools": [
+    {
+      "name": "summarize_content",
+      "description": "AI-powered content summarization using n8n workflow",
+      "url": "https://automation.company.com/webhook/summarize-content",
+      "method": "POST",
+      "timeout": 45000,
+      "maxRetries": 3,
+      "retryDelay": 2000,
+      "rateLimit": {
+        "requests": 10,
+        "window": 60000
+      },
+      "input": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL of content to summarize"
+          },
+          "max_words": {
+            "type": "integer",
+            "description": "Maximum words in summary",
+            "default": 150
+          },
+          "language": {
+            "type": "string",
+            "description": "Language for the summary",
+            "enum": ["en", "es", "fr", "de"],
+            "default": "en"
+          }
+        },
+        "required": ["url"]
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string",
+            "description": "Generated summary"
+          },
+          "word_count": {
+            "type": "integer",
+            "description": "Actual word count"
+          },
+          "source_title": {
+            "type": "string",
+            "description": "Title of the source content"
+          }
+        },
+        "required": ["summary"]
+      },
+      "auth": {
+        "type": "header",
+        "name": "X-API-Key",
+        "valueFromEnv": "SUMMARIZE_API_KEY"
+      },
+      "tags": ["ai", "content", "summarization"]
+    },
+    {
+      "name": "send_slack_notification",
+      "description": "Send notification to Slack via Make.com automation",
+      "url": "https://hook.integromat.com/webhook/slack-notify",
+      "method": "POST",
+      "timeout": 15000,
+      "maxRetries": 2,
+      "retryDelay": 1000,
+      "rateLimit": {
+        "requests": 30,
+        "window": 60000
+      },
+      "input": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "description": "Slack channel (e.g., #general)"
+          },
+          "message": {
+            "type": "string",
+            "description": "Message to send"
+          },
+          "priority": {
+            "type": "string",
+            "description": "Message priority level",
+            "enum": ["low", "normal", "high", "urgent"],
+            "default": "normal"
+          },
+          "mentions": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "List of users to mention (@username)"
+          }
+        },
+        "required": ["channel", "message"]
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether message was sent successfully"
+          },
+          "message_id": {
+            "type": "string",
+            "description": "Slack message ID"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "Timestamp when sent"
+          }
+        }
+      },
+      "authFrom": {
+        "user": "production-user"
+      },
+      "tags": ["notification", "slack", "communication"]
+    },
+    {
+      "name": "analyze_sentiment",
+      "description": "Analyze text sentiment using FlowiseAI",
+      "url": "https://flowise.company.com/api/v1/prediction/sentiment-analysis",
+      "method": "POST",
+      "timeout": 30000,
+      "maxRetries": 3,
+      "retryDelay": 1500,
+      "rateLimit": {
+        "requests": 20,
+        "window": 60000
+      },
+      "input": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Text to analyze for sentiment"
+          },
+          "detailed": {
+            "type": "boolean",
+            "description": "Return detailed sentiment breakdown",
+            "default": false
+          }
+        },
+        "required": ["text"]
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "sentiment": {
+            "type": "string",
+            "description": "Overall sentiment (positive/negative/neutral)"
+          },
+          "confidence": {
+            "type": "number",
+            "description": "Confidence score (0-1)"
+          },
+          "details": {
+            "type": "object",
+            "description": "Detailed sentiment analysis (if requested)"
+          }
+        },
+        "required": ["sentiment", "confidence"]
+      },
+      "auth": {
+        "type": "jwt",
+        "tokenFromEnv": "FLOWISE_JWT_TOKEN"
+      },
+      "tags": ["ai", "sentiment", "analysis"]
+    },
+    {
+      "name": "generate_invoice",
+      "description": "Generate PDF invoice using Zapier automation",
+      "url": "https://hooks.zapier.com/hooks/catch/invoice-generator",
+      "method": "POST",
+      "timeout": 60000,
+      "maxRetries": 2,
+      "retryDelay": 3000,
+      "rateLimit": {
+        "requests": 5,
+        "window": 300000
+      },
+      "input": {
+        "type": "object",
+        "properties": {
+          "client_name": {
+            "type": "string",
+            "description": "Client name for the invoice"
+          },
+          "client_email": {
+            "type": "string",
+            "description": "Client email address"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "description": { "type": "string" },
+                "quantity": { "type": "number" },
+                "rate": { "type": "number" }
+              },
+              "required": ["description", "quantity", "rate"]
+            },
+            "description": "Invoice line items"
+          },
+          "due_date": {
+            "type": "string",
+            "description": "Due date (YYYY-MM-DD)"
+          },
+          "send_email": {
+            "type": "boolean",
+            "description": "Send invoice via email to client",
+            "default": true
+          }
+        },
+        "required": ["client_name", "client_email", "items", "due_date"]
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "binary": {
+            "type": "boolean",
+            "description": "Indicates binary data response"
+          },
+          "contentType": {
+            "type": "string",
+            "description": "MIME type of the response"
+          },
+          "data": {
+            "type": "string",
+            "description": "Base64 encoded PDF data"
+          },
+          "invoice_id": {
+            "type": "string",
+            "description": "Generated invoice ID"
+          }
+        }
+      },
+      "auth": {
+        "type": "header",
+        "name": "Authorization",
+        "value": "Bearer ${ZAPIER_API_TOKEN}"
+      },
+      "tags": ["invoice", "pdf", "billing"]
+    },
+    {
+      "name": "webhook_health_monitor",
+      "description": "Built-in health monitoring for all webhook endpoints",
+      "url": "internal://health-monitor",
+      "method": "GET",
+      "timeout": 5000,
+      "input": {
+        "type": "object",
+        "properties": {
+          "check_all": {
+            "type": "boolean",
+            "description": "Check health of all tools",
+            "default": true
+          }
+        }
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "overall_status": { "type": "string" },
+          "total_tools": { "type": "integer" },
+          "healthy_tools": { "type": "integer" },
+          "degraded_tools": { "type": "integer" },
+          "critical_tools": { "type": "integer" },
+          "tool_details": { "type": "object" }
+        }
+      },
+      "tags": ["monitoring", "health", "system"]
+    }
+  ]
+}
