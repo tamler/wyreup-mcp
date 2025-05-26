@@ -9,10 +9,10 @@ A production-ready Model Context Protocol (MCP) server that transforms webhook e
 - 🌐 **Future MCP Services** (growing ecosystem of MCP-enabled tools)
 - 📱 **Custom Integrations** (build your own MCP client)
 
-[![npm version](https://img.shields.io/npm/v/wyreup-mcp/0.2.6)](https://www.npmjs.com/package/wyreup-mcp)
+[![npm version](https://img.shields.io/npm/v/wyreup-mcp/latest)](https://www.npmjs.com/package/wyreup-mcp)
 [![GitHub](https://img.shields.io/github/license/tamler/wyreup-mcp)](https://github.com/tamler/wyreup-mcp)
 
-**📦 NPM Package:** [wyreup-mcp](https://www.npmjs.com/package/wyreup-mcp) (v0.2.6)
+**📦 NPM Package:** [wyreup-mcp](https://www.npmjs.com/package/wyreup-mcp)
 **🔗 GitHub Repository:** [tamler/wyreup-mcp](https://github.com/tamler/wyreup-mcp)
 
 ## 🎯 What It Does
