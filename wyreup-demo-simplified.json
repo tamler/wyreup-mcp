@@ -1,8 +1,0 @@
-{
-  "tools": [
-    {
-      "name": "my_webhook_tool",
-      "webhook": "https://your-automation-platform.com/webhook/endpoint"
-    }
-  ]
-}

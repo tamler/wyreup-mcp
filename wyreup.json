@@ -1,27 +1,9 @@
 {
   "tools": [
     {
-      "name": "random_quote",
-      "description": "Returns a random inspirational quote.",
-      "url": "https://wyreup.com/tools-mock/random-quote",
-      "public": true,
-      "input": {},
-      "output": { "quote": "string", "author": "string" },
+      "name": "get_quote",
+      "webhook": "https://wyreup.com/tools-mock/random-quote",
       "method": "GET"
-    },
-    {
-      "name": "current_time_utc",
-      "description": "Returns the current server time in ISO 8601 UTC format.",
-      "url": "https://wyreup.com/tools-mock/current-time",
-      "public": false,
-      "input": {},
-      "output": { "currentTimeISO": "string" },
-      "method": "GET",
-      "auth": {
-        "type": "header",
-        "name": "X-API-Key",
-        "value": "mock-secret-key"
-      }
     },
     {
       "name": "echo_message",
@@ -39,18 +21,6 @@
         "type": "header",
         "name": "X-API-Key",
         "value": "test-api-key-12345"
-      }
-    },
-    {
-      "name": "secure_external_tool",
-      "description": "Example tool using external secrets from ~/.wyreup-secrets.",
-      "url": "https://wyreup.com/tools-mock/secure-external",
-      "public": false,
-      "input": { "query": "string" },
-      "output": { "result": "string" },
-      "method": "POST",
-      "authFrom": {
-        "user": "demo-user"
       }
     }
   ]

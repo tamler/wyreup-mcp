@@ -172,15 +172,15 @@ npx wyreup-mcp --validate --config test-wyreup.json
 npx wyreup-mcp --config test-wyreup.json
 ```
 
-**Or use the comprehensive demo configuration:**
+**Or use the comprehensive example configuration:**
 
 ```bash
-# Download the full demo config with all test endpoints
-curl -o wyreup-demo.json https://raw.githubusercontent.com/tamler/wyreup-mcp/main/wyreup-demo.json
+# Download the full example config with all advanced features
+curl -o wyreup-example.json https://raw.githubusercontent.com/tamler/wyreup-mcp/main/wyreup-example.json
 
 # Test all features
-npx wyreup-mcp --validate --config wyreup-demo.json
-npx wyreup-mcp --config wyreup-demo.json
+npx wyreup-mcp --validate --config wyreup-example.json
+npx wyreup-mcp --config wyreup-example.json
 ```
 
 ```bash
@@ -198,17 +198,52 @@ npm run test:sse-client
 - 🖼️ **Image Generation** - `GET /tools-mock/generate-image` (returns base64 PNG)
 - 🎵 **Audio Generation** - `GET /tools-mock/generate-audio` (returns base64 WAV with bytebeat music!)
 
-### Basic Tool Configuration (Full Format)
+### Default Configuration
 
-Create `wyreup.json`:
+The default `wyreup.json` demonstrates both simplified and full formats:
 
 ```json
 {
   "tools": [
     {
-      "name": "summarize_content",
-      "description": "AI-powered content summarization",
-      "url": "https://n8n.company.com/webhook/summarize",
+      "name": "get_quote",
+      "webhook": "https://wyreup.com/tools-mock/random-quote"
+    },
+    {
+      "name": "echo_message",
+      "description": "Echoes back the JSON body. Expects 'message' and 'detail'.",
+      "url": "https://wyreup.com/tools-mock/echo",
+      "public": false,
+      "input": { "message": "string", "detail": "string" },
+      "output": {
+        "received_message": "string",
+        "received_detail": "string",
+        "timestamp": "string"
+      },
+      "method": "POST",
+      "auth": {
+        "type": "header",
+        "name": "X-API-Key",
+        "value": "test-api-key-12345"
+      }
+    }
+  ]
+}
+```
+
+For comprehensive examples with all advanced features, see `wyreup-example.json`.
+
+### Advanced Configuration Features
+
+For production deployments, you can add advanced features:
+
+```json
+{
+  "tools": [
+    {
+      "name": "advanced_tool",
+      "description": "Production-ready tool with all features",
+      "url": "https://your-automation-platform.com/webhook/endpoint",
       "method": "POST",
       "timeout": 30000,
       "maxRetries": 3,

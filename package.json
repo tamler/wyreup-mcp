@@ -54,8 +54,6 @@
     "LICENSE",
     "wyreup.json",
     "wyreup-example.json",
-    "wyreup-demo.json",
-    "wyreup-demo-simplified.json",
     ".env.example",
     "test-server.js",
     "test-sse-client.js"
