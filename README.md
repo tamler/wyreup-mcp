@@ -90,7 +90,13 @@ npx wyreup-mcp
 - ✅ **Description**: "Forward to random quote webhook"
 - ✅ **Method**: POST (default for webhooks)
 - ✅ **Input Schema**: Empty object `{}`
-- ✅ **Output**: Assumes text response
+- ✅ **Output**: Auto-detects JSON, text, binary, or streaming responses
+
+**Supported Response Types:**
+- 📄 **JSON** - Auto-parsed for structured data
+- 📝 **Text/HTML** - Plain text responses
+- 🖼️ **Binary** - Images, PDFs, files (base64 encoded)
+- 🌊 **Streaming** - Real-time event streams
 
 **Test immediately:**
 ```bash
