@@ -52,6 +52,60 @@ npx wyreup-mcp --validate
 npx wyreup-mcp
 ```
 
+### 🚀 **Instant Testing with Live Endpoints**
+
+Skip the setup and test immediately with our live demo endpoints at `wyreup.com`:
+
+```bash
+# Create a quick test configuration
+echo '{
+  "tools": [
+    {
+      "name": "get_quote",
+      "description": "Get an inspirational quote",
+      "url": "https://wyreup.com/tools-mock/random-quote",
+      "method": "GET",
+      "input": {},
+      "output": {
+        "type": "object",
+        "properties": {
+          "quote": { "type": "string" }
+        }
+      }
+    },
+    {
+      "name": "get_time",
+      "description": "Get current UTC time",
+      "url": "https://wyreup.com/tools-mock/current-time",
+      "method": "GET",
+      "auth": {
+        "type": "header",
+        "name": "X-API-Key",
+        "value": "mock-secret-key"
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "time": { "type": "string" }
+        }
+      }
+    }
+  ]
+}' > test-wyreup.json
+
+# Test immediately
+npx wyreup-mcp --validate --config test-wyreup.json
+npx wyreup-mcp --config test-wyreup.json
+```
+
+**Available Test Endpoints:**
+- 🗨️ **Random Quote** - `GET /tools-mock/random-quote` (no auth)
+- ⏰ **Current Time** - `GET /tools-mock/current-time` (API key: `mock-secret-key`)
+- 🔄 **Echo Service** - `POST /tools-mock/echo` (API key: `test-api-key-12345`)
+- ❌ **Error Testing** - `POST /tools-mock/error` (always returns 500)
+- 🖼️ **Image Generation** - `GET /tools-mock/generate-image` (returns base64 PNG)
+- 🎵 **Audio Generation** - `GET /tools-mock/generate-audio` (returns base64 WAV)
+
 ### Basic Tool Configuration
 
 Create `wyreup.json`:
