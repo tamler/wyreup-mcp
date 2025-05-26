@@ -98,13 +98,23 @@ npx wyreup-mcp --validate --config test-wyreup.json
 npx wyreup-mcp --config test-wyreup.json
 ```
 
+**Or use the comprehensive demo configuration:**
+```bash
+# Download the full demo config with all test endpoints
+curl -o wyreup-demo.json https://raw.githubusercontent.com/tamler/wyreup-mcp/main/wyreup-demo.json
+
+# Test all features
+npx wyreup-mcp --validate --config wyreup-demo.json
+npx wyreup-mcp --config wyreup-demo.json
+```
+
 **Available Test Endpoints:**
 - 🗨️ **Random Quote** - `GET /tools-mock/random-quote` (no auth)
 - ⏰ **Current Time** - `GET /tools-mock/current-time` (API key: `mock-secret-key`)
 - 🔄 **Echo Service** - `POST /tools-mock/echo` (API key: `test-api-key-12345`)
 - ❌ **Error Testing** - `POST /tools-mock/error` (always returns 500)
 - 🖼️ **Image Generation** - `GET /tools-mock/generate-image` (returns base64 PNG)
-- 🎵 **Audio Generation** - `GET /tools-mock/generate-audio` (returns base64 WAV)
+- 🎵 **Audio Generation** - `GET /tools-mock/generate-audio` (returns base64 WAV with bytebeat music!)
 
 ### Basic Tool Configuration
 
