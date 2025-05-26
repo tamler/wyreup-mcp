@@ -90,7 +90,7 @@ npx wyreup-mcp
 - ✅ **Description**: "Forward to random quote webhook"
 - ✅ **Method**: POST (default for webhooks)
 - ✅ **Input Schema**: Empty object `{}`
-- ✅ **Output**: Auto-detects JSON, text, binary, or streaming responses
+- ✅ **Output Schema**: Auto-detects JSON, text, binary, or streaming responses
 
 **Supported Response Types:**
 - 📄 **JSON** - Auto-parsed for structured data
@@ -100,7 +100,6 @@ npx wyreup-mcp
 
 **Test immediately:**
 ```bash
-# Create the simplified config
 echo '{
   "tools": [
     {
@@ -110,7 +109,6 @@ echo '{
   ]
 }' > wyreup-simple.json
 
-# Test it instantly
 echo '{ "jsonrpc": "2.0", "id": "call-1", "method": "tools/call", "params": { "name": "get_quote", "arguments": {} } }' | npx wyreup-mcp --config wyreup-simple.json --transport stdio --debug
 ```
 
