@@ -1,6 +1,6 @@
 {
   "name": "wyreup-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "main": "index.js",
   "bin": {
@@ -14,14 +14,27 @@
     "mcp",
     "model-context-protocol",
     "automation",
+    "webhook",
     "tools",
     "claude",
     "ai",
-    "agents"
+    "agents",
+    "n8n",
+    "zapier",
+    "make",
+    "flowise"
   ],
   "author": "",
-  "license": "ISC",
-  "description": "MCP server adapter for exposing automation workflows as agent-callable tools",
+  "license": "MIT",
+  "description": "Production-ready MCP server that transforms automation platform webhooks into reliable, agent-callable tools",
+  "homepage": "https://github.com/tamler/wyreup-mcp",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tamler/wyreup-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tamler/wyreup-mcp/issues"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
     "chalk": "^5.4.1",
