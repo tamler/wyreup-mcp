@@ -44,6 +44,12 @@ Turn any HTTP webhook into an MCP tool that AI agents can use reliably. Define y
 - **Streaming Ready**: Architecture prepared for real-time data streams
 - **Content Type Detection**: Automatic handling of JSON, text, and binary responses
 
+### 🧠 MCP Protocol Compliance
+- **Official MCP SDK**: Built using `@modelcontextprotocol/sdk`
+- **Supports transports**: STDIO and SSE
+- **Tool Registration**: Fully schema-based using `tools/list` and `tools/call`
+- **JSON-RPC 2.0**: Strictly compliant request/response structure
+
 ## 🚀 Quick Start
 
 ### Installation & Setup
@@ -186,7 +192,7 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 **Other MCP Clients:**
 - **VS Code Extensions**: Use MCP extension settings
 - **Custom Applications**: Connect via stdio transport on any platform
-- **Server Deployments**: Use HTTP/SSE transport mode (`--transport sse --port 3333`)
+- **Server Deployments**: Use SSE transport mode (`--transport sse --port 3333`)
 
 The server implements the standard MCP protocol, so it works with any compliant client.
 
@@ -284,8 +290,8 @@ npx wyreup-mcp --validate
 npx wyreup-mcp --validate --config wyreup-example.json
 
 # Server modes
-npx wyreup-mcp                          # STDIO mode (default)
-npx wyreup-mcp --transport sse --port 3333  # HTTP/SSE mode
+npx wyreup-mcp                          # STDIO mode (default, used by Claude Desktop and local tools)
+npx wyreup-mcp --transport sse         # SSE mode for web clients (experimental)
 
 # Development
 npx wyreup-mcp --debug                  # Enable debug logging
@@ -294,8 +300,7 @@ npx wyreup-mcp --init                   # Create sample manifest
 
 ### Built-in Monitoring
 
-The server automatically includes monitoring tools:
-
+These tools are automatically available and do not require configuration:
 - **`health-check`**: Test individual webhook endpoints
 - **`health-status`**: Get success rates and performance metrics  
 - **`rate-limit-status`**: Monitor rate limiting usage
@@ -304,6 +309,13 @@ Example: Check health of all tools
 ```bash
 echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "health-status", "arguments": {}}, "id": 1}' | npx wyreup-mcp
 ```
+
+### 🧪 SSE Transport Notes
+To test SSE locally, make sure your client:
+- Subscribes to `/sse`
+- Waits for the `sessionId` from the `endpoint` event
+- Sends requests via `POST /messages?sessionId=...`
+- Each session is isolated to its own transport and server instance.
 
 ## 🌟 Real-World Examples
 

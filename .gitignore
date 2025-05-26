@@ -126,3 +126,6 @@ dist/
 # Mac files
 .DS_Store
 Thumbs.db
+
+# Internal planning documents
+ROADMAP_INTERNAL.md

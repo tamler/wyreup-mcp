@@ -39,7 +39,18 @@
     "@modelcontextprotocol/sdk": "^1.12.0",
     "chalk": "^5.4.1",
     "minimist": "^1.2.8",
+    "node-fetch": "^3.3.2",
     "undici": "^6.19.2",
     "zod": "^3.22.4"
-  }
+  },
+  "files": [
+    "lib/",
+    "index.js",
+    "README.md",
+    "LICENSE",
+    "wyreup.json",
+    "wyreup-example.json",
+    "wyreup-demo.json",
+    ".env.example"
+  ]
 }
