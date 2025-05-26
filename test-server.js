@@ -6,7 +6,13 @@ async function startTestServer() {
     console.log('🚀 Starting WyreUP MCP Server test...')
     
     // Load the demo configuration
-    const manifest = await loadManifest('./wyreup-demo.json')
+    const manifest = await loadManifest('./wyreup-demo.json', {
+      VALIDATE_FLAG: false,
+      SERVE_FLAG: true,
+      shouldStartServer: false,
+      configFlagUsed: false,
+      INIT_FLAG: false
+    })
     
     // Create server with debug enabled
     const server = createMcpServer(manifest, { DEBUG: true })

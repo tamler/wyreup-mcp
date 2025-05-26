@@ -1,6 +1,6 @@
 {
   "name": "wyreup-mcp",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "type": "module",
   "main": "index.js",
   "bin": {
@@ -8,7 +8,9 @@
   },
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test/test-stdio.js",
+    "test:sse": "node test-server.js",
+    "test:sse-client": "node test-sse-client.js"
   },
   "keywords": [
     "mcp",
@@ -22,9 +24,11 @@
     "n8n",
     "zapier",
     "make",
-    "flowise"
+    "flowise",
+    "cli",
+    "toolserver"
   ],
-  "author": "",
+  "author": "Tamler",
   "license": "MIT",
   "description": "Production-ready MCP server that transforms automation platform webhooks into reliable, agent-callable tools",
   "homepage": "https://wyreup.com/",
@@ -51,6 +55,8 @@
     "wyreup.json",
     "wyreup-example.json",
     "wyreup-demo.json",
-    ".env.example"
+    ".env.example",
+    "test-server.js",
+    "test-sse-client.js"
   ]
 }

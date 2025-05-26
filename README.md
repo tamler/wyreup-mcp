@@ -8,10 +8,10 @@ A production-ready Model Context Protocol (MCP) server that transforms webhook e
 - 🌐 **Future MCP Services** (growing ecosystem of MCP-enabled tools)
 - 📱 **Custom Integrations** (build your own MCP client)
 
-[![npm version](https://badge.fury.io/js/wyreup-mcp.svg)](https://www.npmjs.com/package/wyreup-mcp)
+[![npm version](https://img.shields.io/npm/v/wyreup-mcp/0.2.5)](https://www.npmjs.com/package/wyreup-mcp)
 [![GitHub](https://img.shields.io/github/license/tamler/wyreup-mcp)](https://github.com/tamler/wyreup-mcp)
 
-**📦 NPM Package:** [wyreup-mcp](https://www.npmjs.com/package/wyreup-mcp)
+**📦 NPM Package:** [wyreup-mcp](https://www.npmjs.com/package/wyreup-mcp) (v0.3.0)
 **🔗 GitHub Repository:** [tamler/wyreup-mcp](https://github.com/tamler/wyreup-mcp)
 
 ## 🎯 What It Does
@@ -45,7 +45,8 @@ Turn any HTTP webhook into an MCP tool that AI agents can use reliably. Define y
 - **Content Type Detection**: Automatic handling of JSON, text, and binary responses
 
 ### 🧠 MCP Protocol Compliance
-- **Official MCP SDK**: Built using `@modelcontextprotocol/sdk`
+- ✅ Uses official MCP SDK (v1.12.0+) with full STDIO and SSE support
+- ✅ Per-session SSE transports with isolated tool execution
 - **Supports transports**: STDIO and SSE
 - **Tool Registration**: Fully schema-based using `tools/list` and `tools/call`
 - **JSON-RPC 2.0**: Strictly compliant request/response structure
@@ -118,6 +119,12 @@ curl -o wyreup-demo.json https://raw.githubusercontent.com/tamler/wyreup-mcp/mai
 # Test all features
 npx wyreup-mcp --validate --config wyreup-demo.json
 npx wyreup-mcp --config wyreup-demo.json
+```
+
+```bash
+# Run the full SSE test suite
+npm run test:sse
+npm run test:sse-client
 ```
 
 **Available Test Endpoints:**
@@ -298,6 +305,12 @@ npx wyreup-mcp --debug                  # Enable debug logging
 npx wyreup-mcp --init                   # Create sample manifest
 ```
 
+```bash
+# SSE Testing (experimental)
+npm run test:sse         # Starts local SSE server with demo tools
+npm run test:sse-client  # Sends a tool call over SSE transport
+```
+
 ### Built-in Monitoring
 
 These tools are automatically available and do not require configuration:
@@ -311,11 +324,13 @@ echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "health-stat
 ```
 
 ### 🧪 SSE Transport Notes
-To test SSE locally, make sure your client:
-- Subscribes to `/sse`
-- Waits for the `sessionId` from the `endpoint` event
-- Sends requests via `POST /messages?sessionId=...`
-- Each session is isolated to its own transport and server instance.
+To test SSE locally:
+1. Start the server with `--transport sse`
+2. Your client must subscribe to `/sse` (EventSource)
+3. Wait for the `endpoint` event to get the sessionId
+4. Send `POST` requests to `/messages?sessionId=...`
+5. Each session gets its own transport and tool server instance
+6. Transport is cleaned up after tool execution or connection close
 
 ## 🌟 Real-World Examples
 
