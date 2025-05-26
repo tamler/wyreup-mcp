@@ -1,6 +1,6 @@
 {
   "name": "wyreup-mcp",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "type": "module",
   "main": "index.js",
   "bin": {
@@ -27,7 +27,7 @@
   "author": "",
   "license": "MIT",
   "description": "Production-ready MCP server that transforms automation platform webhooks into reliable, agent-callable tools",
-  "homepage": "https://github.com/tamler/wyreup-mcp",
+  "homepage": "https://wyreup.com/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tamler/wyreup-mcp.git"
