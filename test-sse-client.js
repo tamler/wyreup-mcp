@@ -36,6 +36,10 @@ sse.addEventListener('endpoint', async (event) => {
   sse.close();
 });
 
+sse.addEventListener('message', (event) => {
+  console.log('Received message from server:', event.data);
+});
+
 sse.onerror = (err) => {
   console.error('SSE error:', err);
   sse.close();
