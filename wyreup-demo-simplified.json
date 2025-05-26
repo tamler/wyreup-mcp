@@ -1,8 +1,8 @@
 {
   "tools": [
     {
-      "name": "summary_tool",
-      "webhook": "https://auto.nowarmup.com/webhook/summary"
+      "name": "my_webhook_tool",
+      "webhook": "https://your-automation-platform.com/webhook/endpoint"
     }
   ]
 }
