@@ -3,15 +3,16 @@
 A production-ready Model Context Protocol (MCP) server that transforms webhook endpoints from automation platforms (n8n, Make.com, Zapier, FlowiseAI, etc.) into reliable, agent-callable tools for **any MCP-compatible AI system**.
 
 **Compatible with:**
+
 - 🤖 **Claude Desktop** (Anthropic's official desktop app)
 - 🔧 **Any MCP Client** (VS Code extensions, custom applications, etc.)
 - 🌐 **Future MCP Services** (growing ecosystem of MCP-enabled tools)
 - 📱 **Custom Integrations** (build your own MCP client)
 
-[![npm version](https://img.shields.io/npm/v/wyreup-mcp/0.2.5)](https://www.npmjs.com/package/wyreup-mcp)
+[![npm version](https://img.shields.io/npm/v/wyreup-mcp/0.2.6)](https://www.npmjs.com/package/wyreup-mcp)
 [![GitHub](https://img.shields.io/github/license/tamler/wyreup-mcp)](https://github.com/tamler/wyreup-mcp)
 
-**📦 NPM Package:** [wyreup-mcp](https://www.npmjs.com/package/wyreup-mcp) (v0.2.5)
+**📦 NPM Package:** [wyreup-mcp](https://www.npmjs.com/package/wyreup-mcp) (v0.2.6)
 **🔗 GitHub Repository:** [tamler/wyreup-mcp](https://github.com/tamler/wyreup-mcp)
 
 ## 🎯 What It Does
@@ -21,30 +22,35 @@ Turn any HTTP webhook into an MCP tool that AI agents can use reliably. Define y
 ## ✨ Key Features
 
 ### 🚀 **Enterprise-Ready Reliability**
+
 - **Smart Retry Logic**: Exponential backoff for transient failures
 - **Rate Limiting**: Per-tool request throttling with sliding windows
 - **Health Monitoring**: Real-time endpoint health tracking and statistics
 - **Timeout Management**: Configurable timeouts per tool (great for slow automations)
 
 ### 🔐 **Flexible Authentication**
+
 - **Multiple Auth Types**: Header-based and JWT Bearer token authentication
 - **Environment Variables**: Secure credential management via `valueFromEnv` and `tokenFromEnv`
 - **External Secrets**: Store credentials in `~/.wyreup-secrets/` files
 - **Per-Tool Auth**: Each webhook can use different authentication methods
 
 ### 🛠 **Developer-Friendly**
+
 - **JSON Schema Validation**: Full input/output schema support with Zod validation
 - **Rich Error Handling**: Structured error responses with debugging context
 - **Built-in Monitoring Tools**: Health checks and rate limit status via MCP
 - **Hot Reload**: Changes to manifest files are picked up automatically
 
 ### 🌊 **Advanced HTTP Support**
+
 - **All HTTP Methods**: GET, POST, PUT, PATCH, DELETE support
 - **Binary Data**: Handle file downloads and binary responses
 - **Streaming Ready**: Architecture prepared for real-time data streams
 - **Content Type Detection**: Automatic handling of JSON, text, and binary responses
 
 ### 🧠 MCP Protocol Compliance
+
 - ✅ Uses official MCP SDK (v1.12.0+) with full STDIO and SSE support
 - ✅ Per-session SSE transports with isolated tool execution
 - **Supports transports**: STDIO and SSE
@@ -112,6 +118,7 @@ npx wyreup-mcp --config test-wyreup.json
 ```
 
 **Or use the comprehensive demo configuration:**
+
 ```bash
 # Download the full demo config with all test endpoints
 curl -o wyreup-demo.json https://raw.githubusercontent.com/tamler/wyreup-mcp/main/wyreup-demo.json
@@ -128,6 +135,7 @@ npm run test:sse-client
 ```
 
 **Available Test Endpoints:**
+
 - 🗨️ **Random Quote** - `GET /tools-mock/random-quote` (no auth)
 - ⏰ **Current Time** - `GET /tools-mock/current-time` (API key: `mock-secret-key`)
 - 🔄 **Echo Service** - `POST /tools-mock/echo` (API key: `test-api-key-12345`)
@@ -197,6 +205,7 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 ```
 
 **Other MCP Clients:**
+
 - **VS Code Extensions**: Use MCP extension settings
 - **Custom Applications**: Connect via stdio transport on any platform
 - **Server Deployments**: Use SSE transport mode (`--transport sse --port 3333`)
@@ -207,24 +216,25 @@ The server implements the standard MCP protocol, so it works with any compliant 
 
 ### Tool Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `name` | string | **Required.** Unique tool identifier |
-| `description` | string | **Required.** Human-readable description |
-| `url` | string | **Required.** Full webhook URL |
-| `method` | string | HTTP method (default: POST) |
-| `timeout` | number | Request timeout in milliseconds (default: 30000) |
-| `maxRetries` | number | Maximum retry attempts (default: 3) |
-| `retryDelay` | number | Base retry delay in ms (default: 1000) |
-| `rateLimit` | object | Rate limiting configuration |
-| `input` | object | JSON Schema for input validation |
-| `output` | object | JSON Schema for output description |
-| `auth` | object | Authentication configuration |
-| `authFrom` | object | External authentication source |
+| Property      | Type   | Description                                      |
+| ------------- | ------ | ------------------------------------------------ |
+| `name`        | string | **Required.** Unique tool identifier             |
+| `description` | string | **Required.** Human-readable description         |
+| `url`         | string | **Required.** Full webhook URL                   |
+| `method`      | string | HTTP method (default: POST)                      |
+| `timeout`     | number | Request timeout in milliseconds (default: 30000) |
+| `maxRetries`  | number | Maximum retry attempts (default: 3)              |
+| `retryDelay`  | number | Base retry delay in ms (default: 1000)           |
+| `rateLimit`   | object | Rate limiting configuration                      |
+| `input`       | object | JSON Schema for input validation                 |
+| `output`      | object | JSON Schema for output description               |
+| `auth`        | object | Authentication configuration                     |
+| `authFrom`    | object | External authentication source                   |
 
 ### Authentication Types
 
 **Header Authentication:**
+
 ```json
 {
   "auth": {
@@ -236,6 +246,7 @@ The server implements the standard MCP protocol, so it works with any compliant 
 ```
 
 **Environment Variable:**
+
 ```json
 {
   "auth": {
@@ -247,6 +258,7 @@ The server implements the standard MCP protocol, so it works with any compliant 
 ```
 
 **JWT Bearer:**
+
 ```json
 {
   "auth": {
@@ -257,6 +269,7 @@ The server implements the standard MCP protocol, so it works with any compliant 
 ```
 
 **External Secrets:**
+
 ```json
 {
   "authFrom": {
@@ -266,6 +279,7 @@ The server implements the standard MCP protocol, so it works with any compliant 
 ```
 
 Create `~/.wyreup-secrets/production-user.json`:
+
 ```json
 {
   "tool_name": {
@@ -281,8 +295,8 @@ Create `~/.wyreup-secrets/production-user.json`:
 ```json
 {
   "rateLimit": {
-    "requests": 30,    // Max requests
-    "window": 60000    // Time window in ms
+    "requests": 30, // Max requests
+    "window": 60000 // Time window in ms
   }
 }
 ```
@@ -314,17 +328,21 @@ npm run test:sse-client  # Sends a tool call over SSE transport
 ### Built-in Monitoring
 
 These tools are automatically available and do not require configuration:
+
 - **`health-check`**: Test individual webhook endpoints
-- **`health-status`**: Get success rates and performance metrics  
+- **`health-status`**: Get success rates and performance metrics
 - **`rate-limit-status`**: Monitor rate limiting usage
 
 Example: Check health of all tools
+
 ```bash
 echo '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "health-status", "arguments": {}}, "id": 1}' | npx wyreup-mcp
 ```
 
 ### 🧪 SSE Transport Notes
+
 To test SSE locally:
+
 1. Start the server with `--transport sse`
 2. Your client must subscribe to `/sse` (EventSource)
 3. Wait for the `endpoint` event to get the sessionId
@@ -335,6 +353,7 @@ To test SSE locally:
 ## 🌟 Real-World Examples
 
 ### Content Processing Pipeline
+
 ```json
 {
   "name": "process_article",
@@ -346,8 +365,8 @@ To test SSE locally:
     "type": "object",
     "properties": {
       "url": { "type": "string", "description": "Article URL" },
-      "analysis_type": { 
-        "type": "string", 
+      "analysis_type": {
+        "type": "string",
         "enum": ["summary", "sentiment", "keywords", "full"],
         "default": "summary"
       }
@@ -358,6 +377,7 @@ To test SSE locally:
 ```
 
 ### Slack Notifications
+
 ```json
 {
   "name": "notify_team",
@@ -370,8 +390,8 @@ To test SSE locally:
     "properties": {
       "channel": { "type": "string", "description": "#channel-name" },
       "message": { "type": "string" },
-      "priority": { 
-        "type": "string", 
+      "priority": {
+        "type": "string",
         "enum": ["low", "normal", "high"],
         "default": "normal"
       }
@@ -382,6 +402,7 @@ To test SSE locally:
 ```
 
 ### Document Generation
+
 ```json
 {
   "name": "generate_report",
@@ -406,18 +427,21 @@ To test SSE locally:
 ## 🚀 Future Roadmap
 
 ### Near-Term Enhancements
+
 - **Webhook Signature Verification**: Validate incoming webhook signatures for security
 - **Response Caching**: Cache responses for identical requests to reduce API calls
 - **Connection Pooling**: Optimize HTTP connections for high-throughput scenarios
 - **Prometheus Metrics**: Export detailed metrics for production monitoring
 
 ### Advanced Features
+
 - **Auto-Discovery**: Automatically detect and configure tools from popular platforms
 - **Visual Tool Builder**: Web UI for creating and testing webhook configurations
 - **Team Management**: Multi-user authentication and permission systems
 - **Cloud Registry**: Share and discover webhook tools across teams
 
 ### Platform Integrations
+
 - **Native Platform Support**: Pre-built templates for n8n, Make.com, Zapier, etc.
 - **OAuth Integration**: Simplified authentication flows for supported platforms
 - **Batch Operations**: Support for bulk webhook calls and parallel processing
